@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		{% include 'snippets/head.html' %}
+		<script src='/static/ace/ace.js' type='text/javascript' charset='utf-8'></script>
+	</head>
+
+	{% include 'snippets/navbar.html' %}
+	
+	<form>
+		<section class="section">
+			<div class='columns'>
+				<div class='column'>
+					<div class='card'>
+						<header class="card-header">
+							<p class="card-header-title">
+							  Manifest
+							</p>
+							<a href="#" class="card-header-icon" aria-label="more options">
+							  <span class="icon">
+								<i class="fas fa-angle-down" aria-hidden="true"></i>
+							  </span>
+							</a>
+						</header>
+						<div class='card-content'>
+							<div class='content'>
+								<div class='field'>
+									<input type="text" name="display-name" class='input' placeholder='Display Name'>
+								</div>
+								<div class='field'>
+									<input type="text" name="invocation-name" class='input' placeholder='Invocation Name'>
+								</div>
+								<div class='field'>
+								Category Name: <div class="select">
+												  <select>
+													  <option>No categories</option>
+												  </select>
+												</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class='column'>
+					<div class='card'>
+						<header class="card-header">
+							<p class="card-header-title">
+							  Actions
+							</p>
+							<a href="#" class="card-header-icon" aria-label="more options">
+							  <span class="icon">
+								<i class="fas fa-angle-down" aria-hidden="true"></i>
+							  </span>
+							</a>
+						</header>
+					</div>
+				</div>
+				<div class='column'>
+					<div class='card'>
+						<header class="card-header">
+							<p class="card-header-title">
+							  Types
+							</p>
+							<a href="#" class="card-header-icon" aria-label="more options">
+							  <span class="icon">
+								<i class="fas fa-angle-down" aria-hidden="true"></i>
+							  </span>
+							</a>
+						</header>
+					</div>
+				</div>
+			</div>
+			
+			<textarea name="code" id='code-text-area' hidden></textarea>		
+		</section>
+	</form>
+	
+	<div id='editor' style='position: absolute;top:0;right:0;bottom:0;left:0;width:500px;height:500px;margin:500px;'></div>
+	
+	<script>
+		var editor = ace.edit('editor');
+		var textarea = document.getElementById('code-text-area');
+		editor.setTheme('ace/theme/monokai');
+		editor.session.setMode('ace/mode/python');
+		editor.resize();
+		editor.getSession().on("change", function () { textarea.value = editor.getSession().getValue() });
+	</script>
+
+</html>
