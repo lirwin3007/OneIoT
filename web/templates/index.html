@@ -1,12 +1,39 @@
-<html>
+<!doctype html>
+<html lang="en">
 
-	Registered actions:
-	<ul>
-		{% for action in registeredActions %}
-			<li>{{ action }}</li>
-		{% endfor %}
-	</ul>
+	<head>
+		{% include 'snippets/head.html' %}
+	</head>
+
+	{% include 'snippets/navbar.html' %}
+
+	<body>
+		<section class="section">
+			<div class='columns'>
+				<div class='column'>
+					<div class='card'>
+						<header class="card-header">
+							<p class='card-header-title'>My Action Packages</p>
+						</header>
+						<div class='card-contents'>
+							<div class='content'></div>
+								<ul>
+									{% for action in registeredActions %}
+										<li>{{ action }}</li>
+									{% endfor %}
+								</ul>
+							</div>
+							<footer class='card-footer'>
+								<a href='/add_action_package' class='card-footer-item'>Create Action package</a>
+							</footer>
+						</div>
+					</div>
+					<div class='column'></div>
+					<div class='column'></div>
+				</div>
+			</div>
+		</section>
 	
-	<a href='/new_action'>Add new action</a>
+	</body>
 
 </html>
