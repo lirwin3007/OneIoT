@@ -4,96 +4,24 @@
 	<head>
 		{% include 'snippets/head.html' %}
 		<script src='/static/ace/ace.js' type='text/javascript' charset='utf-8'></script>
+		<script src='/static/js/add_action_package.js'></script>
 	</head>
 
 	{% include 'snippets/navbar.html' %}
-	
+
 	<form>
 		<section class="section">
 			<div class='columns'>
 				<div class='column'>
-					<div class='card'>
-						<header class="card-header">
-							<p class="card-header-title">
-							  Tasks
-							</p>
-							<div class="card-header-icon">
-							  <span class="icon">
-								<i id='tasks-icon' class="fas fa-check-circle has-text-success" aria-hidden="true"></i>
-							  </span>
-							</div>
-						</header>
-						<div class='card-content'>
-							<div class='content'>
-							  <span class="icon">
-								<i id='tasks-manifest-icon' class="fas fa-check-circle has-text-success" aria-hidden="true"></i>
-							  </span>
-							  Complete manifest<br>
-							</div>	
-						</div>
-					</div>
+					{% include 'snippets/add_action_package/tasks.html' %}
 				</div>
 				<div class='column'>
-					<div class='card'>
-						<header class="card-header">
-							<p class="card-header-title">
-							  Manifest
-							</p>
-							<div class="card-header-icon">
-							  <span id='manifest-completed_icon-span' class="icon has-text-danger">
-								<i id='manifest-completed_icon' class="fas fa-times-circle" aria-hidden="true"></i>
-							  </span>
-							</div>
-						</header>
-						<div class='card-content'>
-							<div class='content'>
-								<div class='field'>
-									<input id='field-display-name' type="text" name="display-name" class='input' placeholder="Display Name eg. 'My action'" oninput='validateManifest(false);'>
-								</div>
-								<div class='field'>
-									<input id='field-invocation-name' type="text" name="invocation-name" class='input' placeholder="Invocation Name eg. 'My Action'" oninput='validateManifest(false);'>
-								</div>
-								<div class='field'>
-								Category Name: <div class="select">
-												  <select>
-													  <option value='PRODUCTIVITY'>Productivity</option>
-												  </select>
-												</div>
-								</div>
-							</div>
-						</div>
-					</div>
+					{% include 'snippets/add_action_package/manifest.html' %}
 				</div>
 			</div>
-			
-			<div class='card'>
-				<header class="card-header">
-					<p class="card-header-title">
-					  Actions
-					</p>
-					<div class="card-header-icon">
-					  <span class="icon has-text-success">
-						<i class="fas fa-check-circle" aria-hidden="true"></i>
-					  </span>
-					</div>
-				</header>
-				<div class='card-content'>
-					<div class='content'>
-					  {% include 'snippets/add_action_package/action.html' %}
-					  <div class='box' onClick='addNewAction()' style='cursor: pointer;'>
-						<span class="icon has-text-success">
-							<i class="fas fa-plus-circle" aria-hidden="true"></i>
-						</span>
-						Add Action
-					  </div>
-					</div>	
-				</div>
-			</div>
-			
-			<textarea name="code" id='code-text-area' hidden></textarea>		
+			{% include 'snippets/add_action_package/actions.html' %}
+			<textarea name="code" id='code-text-area' hidden></textarea>
 		</section>
 	</form>
-	
-	<script src='/static/js/add_action_package.js'></script>
 
 </html>
