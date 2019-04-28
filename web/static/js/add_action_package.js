@@ -17,7 +17,7 @@ function collapseAction(action_id) {
 	var general_icon = document.getElementById('action-' + action_id + '-general-icon');
 	var intent = document.getElementById('action-' + action_id + '-intent');
 	var fulfillment = document.getElementById('action-' + action_id + '-fulfillment');
-	
+
 	intent.style.display = 'none';
 	fulfillment.style.display = 'none';
 	general.style.marginBottom = '-12px';
@@ -31,7 +31,7 @@ function expandAction(action_id) {
 	var general_icon = document.getElementById('action-' + action_id + '-general-icon');
 	var intent = document.getElementById('action-' + action_id + '-intent');
 	var fulfillment = document.getElementById('action-' + action_id + '-fulfillment');
-	
+
 	intent.style.display = 'block';
 	fulfillment.style.display = 'block';
 	general.style.marginBottom = '12px';
@@ -48,6 +48,17 @@ function expandCollapseOnClick(action_id) {
 	}
 }
 
+// Adding tags to patterns
+function addTag(action_id, pattern_id, type, input_name) {
+	var field = document.getElementById('action-' + action_id + '-pattern-' + pattern_id);
+	if (type == 'optional') {
+		field.innerHTML += "<span class='tag is-dark' style='margin-left:3px;margin-right:3px;' contentEditable='false'>Optional:" + document.getElementById(input_name).value + "</span>&nbsp";
+	} else {
+		var inputElement = document.getElementById(input_name);
+		field.innerHTML += "<span class='tag is-info' style='margin-left:3px;margin-right:3px;' contentEditable='false'>" + inputElement.options[inputElement.selectedIndex].value + "</span>&nbsp";
+	}
+}
+
 // validation
 // Validating manifest
 function validateManifest(display_errors) {
@@ -56,7 +67,7 @@ function validateManifest(display_errors) {
 	var icon = document.getElementById('manifest-completed_icon');
 	var icon_span = document.getElementById('manifest-completed_icon-span');
 	var tasks_icon = document.getElementById('tasks-manifest-icon');
-	
+
 	if (display_name.value != '' && invocation_name.value) {
 		icon_span.classList.add('has-text-success');
 		icon_span.classList.remove('has-text-danger');
@@ -89,7 +100,7 @@ function validateManifest(display_errors) {
 function validateTasks() {
 	var tasks_icon = document.getElementById('tasks-icon');
 	var manifest_icon = document.getElementById('tasks-manifest-icon');
-	
+
 	if (manifest_icon.classList.contains('has-text-success')) {
 		tasks_icon.classList.add('has-text-success');
 		tasks_icon.classList.remove('has-text-danger');

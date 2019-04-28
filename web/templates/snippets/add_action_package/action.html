@@ -13,10 +13,12 @@
 	</div>
 	<div id='action-0-intent'>
 		<hr>
-		<h2 class='title is-5'>Intent</h1>
+		<h2 class='title is-5'>Intent</h2>
 		<div class='columns is-centered'>
-			<div class='column'>
-				{% include 'snippets/add_action_package/action/trigger.html' %}
+			<div id='action-0-intent-trigger' class='column'>
+				<div class='box'>
+					{% include 'snippets/add_action_package/action/trigger.html' %}
+				</div>
 			</div>
 			<div class='column'>
 				{% include 'snippets/add_action_package/action/parameters.html' %}
@@ -25,14 +27,14 @@
 	</div>
 	<div id='action-0-fulfillment'>
 		<hr>
-		<h2 class='title is-5'>Fulfillment</h1>
+		<h2 class='title is-5'>Fulfillment</h2>
 		<div class='box' style='background-color:#272822'>
 			<div class='columns'>
 				<div class='column'>
 					<div id='editor' style='position: width:100%;height:500px;'></div>
 				</div>
 				<div class='column'>
-					
+
 				</div>
 			</div>
 		</div>
