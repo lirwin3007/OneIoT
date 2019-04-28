@@ -1,0 +1,39 @@
+<div class='box'>
+	<div class='content'>
+		<div id='action-0-pattern-0' tabindex="0" contentEditable="true" style='border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: inset 0 1px 2px rgba(10,10,10,.1); height:200px;'></div>
+		<hr>
+		<div class='columns'>
+			<div class='column'>
+				<div class='field'>
+					<input class='input' type='text' placeholder='Optional phrase...'></input>
+				</div>
+				<div class='button' onclick='addTag(0, 0, "optional")' style='width:100%;'>Add Optional</div>
+			</div>
+			<div class='column'>
+				<div class='field'>
+					<div class='select' style='width: 100%'>
+						<select style='width: 100%'>
+							<option>My Variable</option>
+							<option>My Second Variable</option>
+						</select>
+					</div>
+				</div>
+				<div class='button is-pulled-right' onclick='addTag(0, 0, "test")' style='width: 100%'>Add Variable</div>
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+<script>
+
+function addTag(action_id, pattern_id, name) {
+	var field = document.getElementById('action-' + action_id + '-pattern-' + pattern_id);
+	if (name == 'optional') {
+		field.innerHTML += "<span class='tag is-info' style='margin-left:3px;margin-right:3px;' contentEditable='false'>Optional:" + name + "</span>";
+	} else {
+		field.innerHTML += "<span class='tag is-info' style='margin-left:3px;margin-right:3px;' contentEditable='false'>" + name + "</span>";
+	}
+}
+
+</script>

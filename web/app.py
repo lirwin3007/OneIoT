@@ -7,8 +7,8 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
     
-@app.route('/add_action_package')
-def add_action():
+@app.route('/action_package/add')
+def add_action_package():
     return render_template('add_action_package.html')    
 
 @app.route('/is-assistant-running')
