@@ -1,6 +1,6 @@
 <div class='content'>
-	<h2 class='title is-6'>Triggers</h2>
-	<div id='add-pattern' class='box' onClick='addPattern(0)' style='cursor: pointer;'>
+	<h2 class='title is-5'>Trigger</h2>
+	<div id='add-pattern' class='box' onClick='addPattern()' style='cursor: pointer;'>
 		<span class='icon has-text-success'>
 			<i class='fas fa-plus-circle' aria-hidden='true'></i>
 		</span>
@@ -9,21 +9,5 @@
 </div>
 
 <script>
-	// Adding new patterns
-	function addPattern(action_id) {
-		var newDiv = document.createElement('div');
-		var parentDiv = document.getElementById('action-' + action_id + '-intent-trigger').childNodes[1].childNodes[1];
-		var nodeList = parentDiv.childNodes;
-		var addDiv;
-		for (var i = 0; i < nodeList.length; i++) {
-			console.log(nodeList[i].nodeType);
-			if (nodeList[i].id = 'add-pattern' && nodeList[i].nodeType === Node.ELEMENT_NODE) {
-				addDiv = nodeList[i];
-			}
-		}
-		newDiv.innerHTML = "{{ triggerHTML|safe }}";
-		newDiv.classList.add('box');
-		console.log(addDiv);
-		parentDiv.insertBefore(newDiv, addDiv);
-	}
+	var triggerHTML = "{{ triggerHTML|safe }}";
 </script>

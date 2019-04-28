@@ -1,14 +1,11 @@
 // Setup editor
-var editor = ace.edit('editor');
-var textarea = document.getElementById('code-text-area');
-editor.setTheme('ace/theme/monokai');
-editor.session.setMode('ace/mode/python');
-editor.resize();
-editor.getSession().on("change", function () { textarea.value = editor.getSession().getValue() });
-
-// Adding a new action
-function addNewAction() {
-	console.log("Adding action");
+function setupEditor() {
+	var editor = ace.edit('editor');
+	var textarea = document.getElementById('code-text-area');
+	editor.setTheme('ace/theme/monokai');
+	editor.session.setMode('ace/mode/python');
+	editor.resize();
+	editor.getSession().on("change", function () { textarea.value = editor.getSession().getValue() });
 }
 
 // Collapsing an action
@@ -56,6 +53,107 @@ function addTag(action_id, pattern_id, type, input_name) {
 	} else {
 		var inputElement = document.getElementById(input_name);
 		field.innerHTML += "<span class='tag is-info' style='margin-left:3px;margin-right:3px;' contentEditable='false'>" + inputElement.options[inputElement.selectedIndex].value + "</span>&nbsp";
+	}
+}
+
+var patterns = [];
+
+// Adding new patterns
+function addPattern() {
+	var newDiv = document.createElement('div');
+	var parentDiv = document.getElementById('action-trigger').childNodes[1].childNodes[1];
+	var nodeList = parentDiv.childNodes;
+	var addDiv;
+	for (var i = 0; i < nodeList.length; i++) {
+		if (nodeList[i].id = 'add-pattern' && nodeList[i].nodeType === Node.ELEMENT_NODE) {
+			addDiv = nodeList[i];
+		}
+	}
+	var counter = 0;
+	while (patterns.indexOf(counter) != -1){
+		counter ++;
+	}
+	patterns.push(counter);
+	var innerHTML = triggerHTML;
+	innerHTML = innerHTML.replace(new RegExp("pattern_id", 'g'), counter);
+	newDiv.innerHTML = innerHTML;
+	newDiv.classList.add('box');
+	parentDiv.insertBefore(newDiv, addDiv);
+}
+
+var customParams = {};
+
+// Adding new parameters
+function addParam() {
+	var newDiv = document.createElement('div');
+	var parentDiv = document.getElementById('action-parameters').childNodes[1];
+	var nodeList = parentDiv.childNodes;
+	var addDiv;
+	for (var i = 0; i < nodeList.length; i++) {
+		if (nodeList[i].id = 'add-parameter' && nodeList[i].nodeType === Node.ELEMENT_NODE) {
+			addDiv = nodeList[i];
+		}
+	}
+	var counter = 0;
+	while (counter in customParams){
+		counter ++;
+	}
+	customParams[counter] = {};
+	var innerHTML = parameterHTML;
+	innerHTML = innerHTML.replace(new RegExp("parameter_id", 'g'), counter);
+	newDiv.innerHTML = innerHTML;
+	newDiv.classList.add('box');
+	parentDiv.insertBefore(newDiv, addDiv);
+	updateAllSupportedTypes();
+}
+
+var customKeys = {};
+
+// Adding new keys to create dialog
+function addKeyCreate(param_id) {
+	var newDiv = document.createElement('div');
+	var parentDiv = document.getElementById('keys');
+	var nodeList = parentDiv.childNodes;
+	var addDiv;
+	for (var i = 0; i < nodeList.length; i++) {
+		if (nodeList[i].id = 'parameters-create-add-key' && nodeList[i].nodeType === Node.ELEMENT_NODE) {
+			addDiv = nodeList[i];
+		}
+	}
+	var counter = 0;
+	while (counter in customKeys){
+		counter ++;
+	}
+	customParams[counter] = {};
+	var innerHTML = keyHTML;
+	innerHTML = innerHTML.replace(new RegExp("key_id", 'g'), counter);
+	newDiv.innerHTML = innerHTML;
+	newDiv.classList.add('box');
+	parentDiv.insertBefore(newDiv, addDiv);
+	updateAllSupportedTypes();
+
+	document.getElementById('parameters-create-button').onclick = function() { saveNewType(param_id); };
+}
+
+var customTypes = {};
+
+function saveNewType(param_id) {
+	var name = document.getElementById('parameters-create-name').value;
+	customTypes[name] = customKeys;
+	customKeys = {};
+	document.getElementById("parameters-create").classList.remove("is-active")
+	document.getElementById('keys').innerHTML = '';
+	document.getElementById('parameters-create-name').value = '';
+}
+
+//Updating Supported Types
+function updateAllSupportedTypes() {
+	for (var param in customParams) {
+		var list = document.getElementById("parameters-" + param + "-standard-types");
+		list.innerHTML = "";
+		for (i=0; i<supportedTypes.length; i++) {
+			list.innerHTML += "<div class='dropdown-item'><a><div>" + supportedTypes[i] + "</div></a></div>"
+		}
 	}
 }
 
