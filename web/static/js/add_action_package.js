@@ -6,6 +6,7 @@ function setupEditor() {
 	editor.session.setMode('ace/mode/python');
 	editor.resize();
 	editor.getSession().on("change", function () { textarea.value = editor.getSession().getValue() });
+	editor.setValue("print('Do command', command, 'with params', str(params))");
 }
 
 // Collapsing an action
@@ -168,6 +169,11 @@ function updateAllVariableLists() {
 			select.innerHTML += "<option>" + document.getElementById("action-parameters-" + param + "-name").value + "</option>";
 		}
 	}
+	var docs = document.getElementById("editor-documentation-variables");
+	docs.innerHTML = "";
+	for (var param in customParams) {
+		docs.innerHTML += "<a class='panel-block'><span class='panel-icon'><i class='fas fa-code' aria-hidden='true'></i></span>params['" + document.getElementById("action-parameters-" + param + "-name").value + "']</a>";
+	}
 }
 
 //Updating Supported Types
@@ -200,7 +206,7 @@ function validateManifest(display_errors) {
 	var icon_span = document.getElementById('manifest-completed_icon-span');
 	var tasks_icon = document.getElementById('tasks-manifest-icon');
 
-	if (display_name.value != '' && invocation_name.value) {
+	if (display_name.value != '' && invocation_name.value != '') {
 		icon_span.classList.add('has-text-success');
 		icon_span.classList.remove('has-text-danger');
 		icon.classList.add('fa-check-circle');
@@ -229,6 +235,38 @@ function validateManifest(display_errors) {
 	}
 }
 
+// Validating action
+function validateAction(display_errors) {
+	var action_name = document.getElementById('action-name');
+	var icon = document.getElementById('actions-icon');
+	var tasks_icon = document.getElementById('tasks-action-icon');
+	if (action_name.value == "" || patterns.length == 0) {
+		if (action_name.value == '' && display_errors) {action_name.classList.add('is-danger');} else {action_name.classList.remove('is-danger');}
+		icon.classList.add('has-text-danger');
+		icon.classList.remove('has-text-success');
+		icon.classList.add('fa-times-circle');
+		icon.classList.remove('fa-check-circle');
+		tasks_icon.classList.add('has-text-danger');
+		tasks_icon.classList.remove('has-text-success');
+		tasks_icon.classList.add('fa-times-circle');
+		tasks_icon.classList.remove('fa-check-circle');
+		validateTasks();
+		return false;
+	} else {
+		icon.classList.add('has-text-success');
+		icon.classList.remove('has-text-danger');
+		icon.classList.add('fa-check-circle');
+		icon.classList.remove('fa-times-circle');
+		tasks_icon.classList.add('has-text-success');
+		tasks_icon.classList.remove('has-text-danger');
+		tasks_icon.classList.add('fa-check-circle');
+		tasks_icon.classList.remove('fa-times-circle');
+		action_name.classList.remove('is-danger');
+		validateTasks();
+		return true;
+	}
+}
+
 function validateTasks() {
 	var tasks_icon = document.getElementById('tasks-icon');
 	var manifest_icon = document.getElementById('tasks-manifest-icon');
@@ -245,6 +283,3 @@ function validateTasks() {
 		tasks_icon.classList.remove('fa-check-circle');
 	}
 }
-
-// Run all validation routines to start with
-validateManifest(false);

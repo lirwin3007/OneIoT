@@ -7,21 +7,23 @@
 		<script src='/static/js/add_action_package.js'></script>
 	</head>
 
-	{% include 'snippets/navbar.html' %}
+	<body onload="setupEditor();validateManifest(false);validateAction(false);">
+		{% include 'snippets/navbar.html' %}
 
-	<form>
-		<section class="section">
-			<div class='columns'>
-				<div class='column'>
-					{% include 'snippets/add_action_package/tasks.html' %}
+		<form>
+			<section class="section">
+				<div class='columns'>
+					<div class='column'>
+						{% include 'snippets/add_action_package/tasks.html' %}
+					</div>
+					<div class='column'>
+						{% include 'snippets/add_action_package/manifest.html' %}
+					</div>
 				</div>
-				<div class='column'>
-					{% include 'snippets/add_action_package/manifest.html' %}
-				</div>
-			</div>
-			{% include 'snippets/add_action_package/actions.html' %}
-			<textarea name="code" id='code-text-area' hidden></textarea>
-		</section>
-	</form>
+				{% include 'snippets/add_action_package/actions.html' %}
+				<textarea name="code" id='code-text-area' hidden></textarea>
+			</section>
+		</form>
+	</body>
 
 </html>
