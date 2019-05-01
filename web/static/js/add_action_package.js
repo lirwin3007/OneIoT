@@ -79,6 +79,7 @@ function addPattern() {
 	newDiv.innerHTML = innerHTML;
 	newDiv.classList.add('box');
 	parentDiv.insertBefore(newDiv, addDiv);
+	updateAllVariableLists();
 }
 
 var customParams = {};
@@ -132,7 +133,11 @@ function addKeyCreate(param_id) {
 	parentDiv.insertBefore(newDiv, addDiv);
 	updateAllSupportedTypes();
 
-	document.getElementById('parameters-create-button').onclick = function() { saveNewType(param_id); };
+}
+
+function showAddTypeModal(parameter_id) {
+	document.getElementById("parameters-create-button").onclick = function() { saveNewType(parameter_id); };
+	document.getElementById("parameters-create").classList.add("is-active")
 }
 
 var customTypes = {};
@@ -144,6 +149,26 @@ function saveNewType(param_id) {
 	document.getElementById("parameters-create").classList.remove("is-active")
 	document.getElementById('keys').innerHTML = '';
 	document.getElementById('parameters-create-name').value = '';
+	updateAllSupportedTypes();
+	selectType(name, param_id);
+}
+
+function discardNewType() {
+	document.getElementById("parameters-create").classList.remove("is-active")
+	document.getElementById('keys').innerHTML = '';
+	document.getElementById('parameters-create-name').value = '';
+}
+
+//Updating variables
+function updateAllVariableLists() {
+	for (var pattern in patterns) {
+		var select = document.getElementById("action-action_id-pattern-" + pattern + "-variable-input");
+		select.innerHTML = "";
+		for (var param in customParams) {
+			console.log("action-parameters-" + param + "-name");
+			select.innerHTML += "<option>" + document.getElementById("action-parameters-" + param + "-name").value + "</option>";
+		}
+	}
 }
 
 //Updating Supported Types
@@ -152,9 +177,19 @@ function updateAllSupportedTypes() {
 		var list = document.getElementById("parameters-" + param + "-standard-types");
 		list.innerHTML = "";
 		for (i=0; i<supportedTypes.length; i++) {
-			list.innerHTML += "<div class='dropdown-item'><a><div>" + supportedTypes[i] + "</div></a></div>"
+			list.innerHTML += "<div class='dropdown-item' onclick=\"selectType('" + supportedTypes[i] + "','" + param + "')\"><a><div>" + supportedTypes[i] + "</div></a></div>"
+		}
+		list = document.getElementById("parameters-" + param + "-custom-types");
+		list.innerHTML = "";
+		for (var type in customTypes) {
+			list.innerHTML += "<div class='dropdown-item' onclick=\"selectType('" + type + "','" + param + "')\"><a><div>" + type + "</div></a></div>"
 		}
 	}
+}
+
+function selectType(type, param_id) {
+	var drop_down_label = document.getElementById("parameters-" + param_id + "-chosen-type");
+	drop_down_label.innerHTML = type;
 }
 
 // validation
