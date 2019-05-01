@@ -165,7 +165,6 @@ function updateAllVariableLists() {
 		var select = document.getElementById("action-action_id-pattern-" + pattern + "-variable-input");
 		select.innerHTML = "";
 		for (var param in customParams) {
-			console.log("action-parameters-" + param + "-name");
 			select.innerHTML += "<option>" + document.getElementById("action-parameters-" + param + "-name").value + "</option>";
 		}
 	}
