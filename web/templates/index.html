@@ -10,6 +10,7 @@
 	<body>
 		<section class="section">
 			<div class='columns'>
+
 				<div class='column'>
 					<div class='card'>
 						<header class="card-header">
@@ -27,8 +28,29 @@
 								<a href='/action_package/add' class='card-footer-item'>Create Action package</a>
 							</footer>
 						</div>
+
 					</div>
-					<div class='column'></div>
+					<div class='column'>
+
+						<div class='card'>
+							<header class="card-header">
+								<p class='card-header-title'>My Remote Processors</p>
+							</header>
+							<div class='card-contents'>
+								<div class='content'>
+									<ul>
+										{% for action in remoteProcessors %}
+											<li>{{ action }}</li>
+										{% endfor %}
+									</ul>
+								</div>
+								<footer class='card-footer'>
+									<a href='/remote-processor/setup' class='card-footer-item'>Add Remote Processor</a>
+								</footer>
+							</div>
+						</div>
+
+					</div>
 					<div class='column'></div>
 				</div>
 			</div>
