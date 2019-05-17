@@ -3,7 +3,7 @@ import datetime
 
 def print_message(status, message, include_time = False):
 	print('[' + status + ']\t' + message + ('\t' + str(datetime.datetime.now().strftime('%M:%S.%f')) if include_time else ''))
-	
+
 def install_package(name):
 	print_message('INFO', 'Installing ' + name)
 	result = subprocess.call([sys.executable, '-m', 'pip', 'install', name])
@@ -19,6 +19,13 @@ if not __name__ == '__main__':
 if not os.getcwd() == os.path.expanduser('~') + '/OneIoT':
 	print_message('FATAL', 'Not executing in ' + os.path.expanduser('~') + '/OneIoT')
 	exit()
+
+os.system("clear")
+print("OneIoT setup")
+print()
+print("Please ensure that you are connected to the internet")
+print("Plug in a microphone and speaker and press [ENTER] to continue")
+input()
 
 os.system("clear")
 #Set up microphone and speaker
@@ -41,11 +48,11 @@ while not set_up:
 	audioFile.write('pcm.mic {\n\ttype plug\n\tslave {\n\t\tpcm "hw:' + mic_card + ',' + mic_device + '"\n\t}\n}\n')
 	audioFile.write('pcm.speaker {\n\ttype plug\n\tslave {\n\t\tpcm "hw:' + spk_card + ',' + spk_device + '"\n\t}\n}')
 	audioFile.close()
-	
+
 	print("Testing audio")
 	subprocess.call(['speaker-test', '-t', 'wav', '-l', '3'])
 	set_up = input("Was sound audible? (y/n)") == 'y'
-	
+
 	if set_up:
 		print("Testing microphone. Please make noise")
 		subprocess.call(['arecord', '--format=S16_LE', '--duration=5', '--rate=16000', '--file-type=raw', 'out.raw'])
