@@ -4,12 +4,12 @@ An open source platform for IoT development
 
 OneIoT is a platform to create an interconnected network of devices. The center of this network is a Raspberry Pi 3, which runs the Google assistant and can connect to a number of ESP32 based development boards running Micropython.
 
-### Installation
-##### Requirements
+## Installation
+### Requirements
  - Raspberry Pi 3 running Raspbian (or Noobs)
  - Internet connection
 
-##### Setup
+### Setup
 Install dependancies
 ```bash
 sudo apt-get update
