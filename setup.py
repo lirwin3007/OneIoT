@@ -1,5 +1,6 @@
 import os, sys, subprocess
 import datetime
+import configparser
 
 def print_message(status, message, include_time = False):
 	print('[' + status + ']\t' + message + ('\t' + str(datetime.datetime.now().strftime('%M:%S.%f')) if include_time else ''))
@@ -140,6 +141,13 @@ install_package('google-auth-oauthlib[tool]')
 
 os.system("clear")
 os.system("google-oauthlib-tool --scope https://www.googleapis.com/auth/assistant-sdk-prototype --scope https://www.googleapis.com/auth/gcm --save --headless --client-secrets /home/pi/assistant-credentials.json")
+
+config = configparser.ConfigParser()
+config['wireless-info'] = {'ssid':network_name, 'psk':network_password}
+config['assistant'] = {'model-id':model_id, 'project-id':project_id}
+
+with open('config.ini', 'w') as configfile:
+	config.write(configfile)
 
 os.system("clear")
 print("Device setup complete! please reboot now")
