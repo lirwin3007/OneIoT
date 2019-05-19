@@ -15,6 +15,7 @@ Install dependancies
 sudo apt-get update
 sudo apt-get install python3-dev
 sudo apt-get install portaudio19-dev libffi-dev libssl-dev libmpg123-dev
+sudo apt-get install dnsmasq hostapd
 ```
 Get the source
 ```bash
