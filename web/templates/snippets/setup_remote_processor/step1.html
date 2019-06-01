@@ -64,7 +64,11 @@
     Http.send("port=" + COMPort);
     Http.onreadystatechange=function(){
       if (this.readyState == 4) {
-        console.log(this.responseText);
+        if (this.responseText == "true"){
+          state.step = 2;
+        } else {
+          alert("Failed. Please try again")
+        }
       }
     }
   }

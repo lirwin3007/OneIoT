@@ -27,6 +27,7 @@
 		var state = {
 		  set step(x) {
 		    this._step = x;
+				this._substep = 1;
 				var allSteps = document.getElementsByClassName("step");
 				for (i = 0; i < allSteps.length; i++) {
 					if (allSteps[i].id != 'step-' + this._step) {
