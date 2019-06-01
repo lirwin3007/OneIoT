@@ -37,13 +37,23 @@
 								<p class='card-header-title'>My Remote Processors</p>
 							</header>
 							<div class='card-contents'>
-								<div class='content'>
-									<ul>
-										{% for action in remoteProcessors %}
-											<li>{{ action }}</li>
-										{% endfor %}
-									</ul>
-								</div>
+								{% for processor in remote_processors %}
+									<div class='content'>
+										<div class='box'>
+											<div class='columns'>
+												<div class='column is-10'>
+													<b>{{remote_processors[processor]['INFO']['name']}}</b><br>
+													<i>{{remote_processors[processor]['INFO']['description']}}</i>
+												</div>
+												<div class='column'>
+													<span class="icon is-large">
+													  <i class="fas fa-2x fa-laptop-code"></i>
+													</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								{% endfor %}
 								<footer class='card-footer'>
 									<a href='/remote-processor/setup' class='card-footer-item'>Add Remote Processor</a>
 								</footer>

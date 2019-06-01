@@ -11,7 +11,15 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', remote_processors=get_remote_processors())
+
+def get_remote_processors():
+    result = {}
+    config = configparser.ConfigParser()
+    for directory in [f.path for f in os.scandir('./devices') if f.is_dir()]:
+        config.read(directory + '/config.ini')
+        result[config["INFO"]["id"]] = config._sections
+    return result
 
 # ESP32
 @app.route('/remote-processor/setup')
