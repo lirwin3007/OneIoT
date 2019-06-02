@@ -72,14 +72,21 @@ def upload_to_remote_processor(id):
     open('devices/' + str(id) + '/main.py', 'w').write(main_file)
 
     # Kill the currently running program
-    requests.get(url="http://" + remote_device['INFO']['ip'] + "/kill_for_program_flash")
+    #requests.get(url="http://" + remote_device['INFO']['ip'] + "/kill_for_program_flash")
 
     # Upload the user's files
     webrepl_cli.main('OneIoT', '192.168.4.7:boot.py', 'put', src_file = 'devices/' + str(id) + '/boot.py')
     webrepl_cli.main('OneIoT', '192.168.4.7:main.py', 'put', src_file = 'devices/' + str(id) + '/main.py')
     webrepl_cli.main('OneIoT', '192.168.4.7:user.py', 'put', src_file = 'devices/' + str(id) + '/user.py')
 
-    return "true"
+    return json.dumps(callables)
+
+@app.route('/remote-processor/test/<id>/<function>', methods=['POST'])
+def test_remote_processor(id, function):
+    remote_device = get_remote_processors()[id]
+    print(request.json)
+    result = requests.post(url="http://" + remote_device['INFO']['ip'] + "/" + function, data=json.dumps(request.json))
+    return result.text
 
 all_ports = None
 @app.route('/remote-processor/setup/1-1')
