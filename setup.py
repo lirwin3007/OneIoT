@@ -138,6 +138,7 @@ print_message('INFO', 'Installing required python packages')
 install_package('google-assistant-library==1.0.1')
 install_package('google-assistant-sdk[samples]==0.5.1')
 install_package('google-auth-oauthlib[tool]')
+install_package('websocket_client')
 
 os.system("clear")
 os.system("google-oauthlib-tool --scope https://www.googleapis.com/auth/assistant-sdk-prototype --scope https://www.googleapis.com/auth/gcm --save --headless --client-secrets /home/pi/assistant-credentials.json")

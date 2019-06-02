@@ -4,6 +4,7 @@ import esptool
 import configparser
 import webrepl_cli
 import requests
+import websocket
 
 #from PyAccessPoint import pyaccesspoint
 #access_point = pyaccesspoint.AccessPoint(ssid='OneIoT', password='oneiot')
@@ -39,12 +40,12 @@ def program_remote_processor(id):
 def upload_to_remote_processor(id):
     remote_device = get_remote_processors()[id]
     code = request.values["code"]
-    print(code)
 
     # Store the user's code in a file
     file = open('devices/' + str(id) + '/user.py', 'w')
     file.write(code)
     file.close()
+    shutil.copyfile('devices/' + str(id) + '/user.py', 'static/devices/' + str(id) + '/user.py')
 
     # Parse the user's code for routines
     all_routines = re.findall("def .*", code)
@@ -56,7 +57,6 @@ def upload_to_remote_processor(id):
         callables[routine_name] = [x.strip() for x in callables[routine_name]]
         if callables[routine_name] == ['']:
             callables[routine_name] = []
-    print(callables)
 
     # Fill out templated details on source files
     shutil.copyfile('devices/boot_template.py', 'devices/' + str(id) + '/boot.py')
@@ -71,13 +71,42 @@ def upload_to_remote_processor(id):
     main_file = main_file.replace('{{CALLABLES}}', str(callables))
     open('devices/' + str(id) + '/main.py', 'w').write(main_file)
 
+    # Update the device's json file
+    open('devices/' + str(id) + '/device.json', 'w').write(json.dumps(callables))
+
     # Kill the currently running program
-    #requests.get(url="http://" + remote_device['INFO']['ip'] + "/kill_for_program_flash")
+    try:
+        requests.get(url="http://" + remote_device['INFO']['ip'] + "/kill_for_program_flash", timeout=2)
+    except:
+        pass
 
     # Upload the user's files
     webrepl_cli.main('OneIoT', '192.168.4.7:boot.py', 'put', src_file = 'devices/' + str(id) + '/boot.py')
     webrepl_cli.main('OneIoT', '192.168.4.7:main.py', 'put', src_file = 'devices/' + str(id) + '/main.py')
     webrepl_cli.main('OneIoT', '192.168.4.7:user.py', 'put', src_file = 'devices/' + str(id) + '/user.py')
+
+    # Reboot the remote processor
+    ws = websocket.WebSocket()
+    ws.connect("ws://192.168.4.7:8266")
+    ws.send("OneIoT\n")
+    ws.send("import machine\r\n")
+    ws.send("machine.reset()\r\n")
+    ws.close()
+
+    return json.dumps(callables)
+
+@app.route('/remote-processor/get_callables/<id>')
+def remote_processor_get_callables(id):
+    code = open('devices/' + str(id) + '/user.py').read()
+    all_routines = re.findall("def .*", code)
+    callables = {}
+    for routine in all_routines:
+        routine_name = routine[routine.index("def ")+4:routine.index("(")].strip()
+        args = routine[routine.find("(") + 1:routine.find(")")]
+        callables[routine_name] = args.split(",")
+        callables[routine_name] = [x.strip() for x in callables[routine_name]]
+        if callables[routine_name] == ['']:
+            callables[routine_name] = []
 
     return json.dumps(callables)
 
@@ -143,4 +172,4 @@ def is_assistant_running():
         return "Halted"
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', threaded=True)

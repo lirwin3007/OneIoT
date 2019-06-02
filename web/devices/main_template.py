@@ -13,28 +13,26 @@ callables = {{CALLABLES}}
 running = True
 while running:
     cl, addr = s.accept()
-    print()
     print('client connected from', addr)
-    request = cl.recv(2048)
-    request = str(request)
 
-    print(request)
+    headers = cl.recv(1024).decode("utf-8")
+    if not headers: break
+    data = cl.recv(1024).decode("utf-8")
+    if not data: break
 
     args = {}
-    temp_args = request.split("\\r\\n\\r\\n")
-    if len(temp_args) > 1:
-        temp_args = temp_args[1][:-1]
+    if len(data) > 0:
         try:
-            args = json.loads(temp_args)
+            args = json.loads(data)
         except:
             args = {}
 
-    if request.find("POST") != -1:
+    if headers.find("POST") != -1:
         type = "POST"
-        url = request[request.index("POST ") + 5:request.index("HTTP")].strip()
-    elif request.find("GET") != -1:
+        url = headers[headers.index("POST ") + 5:headers.index("HTTP")].strip()
+    elif headers.find("GET") != -1:
         type = "GET"
-        url = request[request.index("GET ") + 4:request.index("HTTP")].strip()
+        url = headers[headers.index("GET ") + 4:headers.index("HTTP")].strip()
 
     print("args = " + str(args))
     print("type = " + str(type))
@@ -69,7 +67,7 @@ while running:
             result = None
             print("Error executing '" + command + "':\n" + str(e))
     else:
-        result = None
+        result = "Invalid request"
         print("Invalid request")
 
     cl.send('HTTP/1.1 200 OK\n')
