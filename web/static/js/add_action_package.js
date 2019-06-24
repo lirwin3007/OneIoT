@@ -169,10 +169,10 @@ function updateAllVariableLists() {
 			select.innerHTML += "<option>" + document.getElementById("action-parameters-" + param + "-name").value + "</option>";
 		}
 	}
-	var docs = document.getElementById("editor-documentation-variables");
+	var docs = document.getElementById("editor-reference-variables");
 	docs.innerHTML = "";
 	for (var param in customParams) {
-		docs.innerHTML += "<a class='panel-block'><span class='panel-icon'><i class='fas fa-code' aria-hidden='true'></i></span>params['" + document.getElementById("action-parameters-" + param + "-name").value + "']</a>";
+		docs.innerHTML += "<a class='panel-block'><span class='panel-icon'><i class='fas fa-cogs' aria-hidden='true'></i></span><div style='width:100%;'><div class='is-pulled-left'>" + document.getElementById("action-parameters-" + param + "-name").value + "</div><div class='is-pulled-right has-text-grey is-italic'>params['" + document.getElementById("action-parameters-" + param + "-name").value + "']</div></div></a>";
 	}
 }
 
@@ -282,4 +282,13 @@ function validateTasks() {
 		tasks_icon.classList.add('fa-times-circle');
 		tasks_icon.classList.remove('fa-check-circle');
 	}
+}
+
+//pattern updater
+var patterns = [];
+function updatePatternInput() {
+	var pattern_divs = document.querySelectorAll('.pattern');
+	Array.prototype.forEach.call(pattern_divs, function(element, index) {
+    	console.log(element.innerHTML);
+	});
 }

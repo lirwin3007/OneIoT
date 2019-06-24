@@ -10,7 +10,7 @@
 	<body onload="setupEditor();validateManifest(false);validateAction(false);">
 		{% include 'snippets/navbar.html' %}
 
-		<form>
+		<form action="/action_package/add/create" method="post">
 			<section class="section">
 				<div class='columns'>
 					<div class='column'>
@@ -22,6 +22,7 @@
 				</div>
 				{% include 'snippets/add_action_package/actions.html' %}
 				<textarea name="code" id='code-text-area' hidden></textarea>
+				<input type="submit">
 			</section>
 		</form>
 	</body>
