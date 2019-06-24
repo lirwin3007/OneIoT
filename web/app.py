@@ -6,6 +6,8 @@ import webrepl_cli
 import requests
 import websocket
 
+import devices
+
 #from PyAccessPoint import pyaccesspoint
 #access_point = pyaccesspoint.AccessPoint(ssid='OneIoT', password='oneiot')
 #access_point.start()
@@ -14,6 +16,8 @@ app = Flask(__name__)
 
 global_config = configparser.ConfigParser()
 global_config.read('../config.ini')
+
+device_dict = devices.get_devices()
 
 @app.route('/')
 def index():
@@ -24,7 +28,9 @@ def get_remote_processors():
     config = configparser.ConfigParser()
     for directory in [f.path for f in os.scandir('./devices') if f.is_dir()]:
         config.read(directory + '/config.ini')
-        result[config["INFO"]["id"]] = config._sections
+        result[int(config["INFO"]["id"])] = {x:dict(config._sections[x]) for x in config._sections}
+        result[int(config["INFO"]["id"])]["callables"] = json.loads(open(directory + '/device.json').read())
+
     return result
 
 # ESP32
@@ -38,7 +44,7 @@ def program_remote_processor(id):
 
 @app.route('/remote-processor/upload/<id>', methods=['POST'])
 def upload_to_remote_processor(id):
-    remote_device = get_remote_processors()[id]
+    remote_device = get_remote_processors()[int(id)]
     code = request.values["code"]
 
     # Store the user's code in a file
@@ -59,39 +65,41 @@ def upload_to_remote_processor(id):
             callables[routine_name] = []
 
     # Fill out templated details on source files
-    shutil.copyfile('devices/boot_template.py', 'devices/' + str(id) + '/boot.py')
-    boot_file = open('devices/' + str(id) + '/boot.py').read()
-    boot_file = boot_file.replace('{{SSID}}', global_config['wireless-info']['ssid'])
-    boot_file = boot_file.replace('{{PSK}}', global_config['wireless-info']['psk'])
-    boot_file = boot_file.replace('{{IP_ADDRESS}}', remote_device['INFO']['ip'])
-    open('devices/' + str(id) + '/boot.py', 'w').write(boot_file)
+    #shutil.copyfile('devices/boot_template.py', 'devices/' + str(id) + '/boot.py')
+    #boot_file = open('devices/' + str(id) + '/boot.py').read()
+    #boot_file = boot_file.replace('{{SSID}}', global_config['wireless-info']['ssid'])
+    #boot_file = boot_file.replace('{{PSK}}', global_config['wireless-info']['psk'])
+    #boot_file = boot_file.replace('{{IP_ADDRESS}}', remote_device['INFO']['ip'])
+    #open('devices/' + str(id) + '/boot.py', 'w').write(boot_file)
 
-    shutil.copyfile('devices/main_template.py', 'devices/' + str(id) + '/main.py')
-    main_file = open('devices/' + str(id) + '/main.py').read()
-    main_file = main_file.replace('{{CALLABLES}}', str(callables))
-    open('devices/' + str(id) + '/main.py', 'w').write(main_file)
+    #shutil.copyfile('devices/main_template.py', 'devices/' + str(id) + '/main.py')
+    #main_file = open('devices/' + str(id) + '/main.py').read()
+    #main_file = main_file.replace('{{CALLABLES}}', str(callables))
+    #open('devices/' + str(id) + '/main.py', 'w').write(main_file)
 
     # Update the device's json file
     open('devices/' + str(id) + '/device.json', 'w').write(json.dumps(callables))
 
     # Kill the currently running program
-    try:
-        requests.get(url="http://" + remote_device['INFO']['ip'] + "/kill_for_program_flash", timeout=2)
-    except:
-        pass
+    #try:
+    #    requests.get(url="http://" + remote_device['INFO']['ip'] + "/kill_for_program_flash", timeout=2)
+    #except:
+    #    pass
 
     # Upload the user's files
-    webrepl_cli.main('OneIoT', '192.168.4.7:boot.py', 'put', src_file = 'devices/' + str(id) + '/boot.py')
-    webrepl_cli.main('OneIoT', '192.168.4.7:main.py', 'put', src_file = 'devices/' + str(id) + '/main.py')
-    webrepl_cli.main('OneIoT', '192.168.4.7:user.py', 'put', src_file = 'devices/' + str(id) + '/user.py')
+    #webrepl_cli.main('OneIoT', '192.168.4.7:boot.py', 'put', src_file = 'devices/' + str(id) + '/boot.py')
+    #webrepl_cli.main('OneIoT', '192.168.4.7:main.py', 'put', src_file = 'devices/' + str(id) + '/main.py')
+    #webrepl_cli.main('OneIoT', '192.168.4.7:user.py', 'put', src_file = 'devices/' + str(id) + '/user.py')
+    device_dict[int(id)].upload('devices/' + str(id) + '/user.py', 'user.py')
 
     # Reboot the remote processor
-    ws = websocket.WebSocket()
-    ws.connect("ws://192.168.4.7:8266")
-    ws.send("OneIoT\n")
-    ws.send("import machine\r\n")
-    ws.send("machine.reset()\r\n")
-    ws.close()
+    #ws = websocket.WebSocket()
+    #ws.connect("ws://192.168.4.7:8266")
+    #ws.send("OneIoT\n")
+    #ws.send("import machine\r\n")
+    #ws.send("machine.reset()\r\n")
+    #ws.close()
+    device_dict[int(id)].reset()
 
     return json.dumps(callables)
 
@@ -112,10 +120,13 @@ def remote_processor_get_callables(id):
 
 @app.route('/remote-processor/test/<id>/<function>', methods=['POST'])
 def test_remote_processor(id, function):
-    remote_device = get_remote_processors()[id]
+    command = "result = device_dict[int(id)]." + function + "("
     print(request.json)
-    result = requests.post(url="http://" + remote_device['INFO']['ip'] + "/" + function, data=json.dumps(request.json))
-    return result.text
+    for arg in request.json:
+        command += request.json[arg] + ","
+    command += ")"
+    exec(command)
+    return result
 
 all_ports = None
 @app.route('/remote-processor/setup/1-1')
@@ -162,7 +173,14 @@ def add_action_package():
 
     supportedTypes = ['Number', 'Text', 'Yes/No', 'URL', 'Email', 'Phone Number', 'Date', 'Time', 'DateTime', 'Day of the Week', 'Colour', 'Currency', 'Distance', 'Temperature', 'Organisation', 'Person', 'Place', 'Product', 'Book', 'Movie', 'TV Series', 'Cuisine', 'Music Album', 'Music Recording']
 
-    return render_template('add_action_package.html', triggerHTML=triggerHTML, parameterHTML=parameterHTML, keyHTML=keyHTML, supportedTypes=supportedTypes)
+    device_manifest = get_remote_processors()
+    print(device_manifest)
+
+    return render_template('add_action_package.html', triggerHTML=triggerHTML, parameterHTML=parameterHTML, keyHTML=keyHTML, supportedTypes=supportedTypes, device_manifest=device_manifest)
+
+@app.route('/action_package/add/create', methods=['POST'])
+def create_Action_package():
+    print(request.values)
 
 @app.route('/is-assistant-running')
 def is_assistant_running():
@@ -172,4 +190,4 @@ def is_assistant_running():
         return "Halted"
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', threaded=True)
+    app.run(debug=False, host='0.0.0.0', threaded=True)
