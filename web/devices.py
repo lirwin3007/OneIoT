@@ -39,7 +39,11 @@ class device:
         self.info = info
         for callable in callables:
             exec("self." + callable + " = callableFunction('" + callable + "', callables[callable], self)")
-        self.connect()
+        try:
+            self.connect()
+            self.online = True
+        except OSError as e:
+            self.online = False
 
     def disconnect(self):
         self.ws.close()

@@ -1,0 +1,30 @@
+{
+  "name": "OneIoT",
+  "version": "0.0.0",
+  "description": "OneIoT - Making IoT seamless",
+  "main": "sass/style.scss",
+  "scripts": {
+    "css-build": "node-sass --omit-source-map-url sass/mystyles.scss static/bulma/bulma.css",
+    "css-watch": "npm run css-build -- --watch",
+    "start": "npm run css-watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lirwin3007/OneIoT.git"
+  },
+  "keywords": [
+    "IoT",
+    "Raspberry",
+    "Pi",
+    "ESP32"
+  ],
+  "author": "Louis Irwin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lirwin3007/OneIoT/issues"
+  },
+  "homepage": "https://github.com/lirwin3007/OneIoT#readme",
+  "devDependencies": {
+    "bulma": "^0.7.5"
+  }
+}
