@@ -1,10 +1,7 @@
-import Pyro4
 from Device import Device
 
 import os, json, configparser
 
-@Pyro4.expose
-@Pyro4.behavior(instance_mode="single")
 class DeviceManager:
 
     def __init__(self):

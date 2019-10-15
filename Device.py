@@ -1,19 +1,19 @@
 import websocket, webrepl_cli, json
 import configparser, esptool, serial, time, re
 
+import socket
+
 DEVICE_CONNECTED = 0
 DEVICE_NOT_CONNECTED = 1
 
-class callableFunction:
-    def __init__(self, name, args, device):
-        self.name = name
-        self.args = args
+class Callable:
+
+    def __init__(self, command, device):
+        self.command = command
         self.device = device
 
     def __call__(self, *argv):
-        if len(argv) != len(self.args):
-            raise ValueError("Incorrect number of arguments. " + str(len(self.args)) + " requrired, " + str(len(argv)) + " supplied")
-        return self.device.send(self.name, argv)
+        return self.device.send(self.command, list(argv))
 
 class Device:
 
@@ -25,10 +25,21 @@ class Device:
         self._ttyPort = None
         self.refreshMethods()
 
+    def _send_to_core(self, command, args):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect(("localhost", 1102))
+            command_string = command
+            for arg in args:
+                command_string += "\n" + (json.dumps(arg) if isinstance(arg, list) else str(arg))
+            sock.sendall(bytes(command_string, 'ascii'))
+            result = str(sock.recv(1024), 'ascii')
+            return result
+
     def refreshMethods(self):
         self.callables = json.load(open(self.device_path + "/device.json"))
         for callable in self.callables:
-            exec("self." + callable + " = callableFunction('" + callable + "', self.callables[callable], self)")
+            setattr(self, callable, Callable(callable, self))
+            #exec("self." + callable + " = callableFunction('" + callable + "', self.callables[callable], self)")
 
     def save(self):
         config = configparser.ConfigParser()
@@ -41,20 +52,7 @@ class Device:
             devicefile.write("[]");
 
     def send(self, command, args):
-        arg_string = ""
-        for arg in args:
-            arg_string += str(arg) + ","
-        command = "print(json.dumps(user." + command + "(" + arg_string + ")))"
-        self.ws.send(command + "\r\n")
-
-        result = ""
-        addition = ""
-        while addition != ">>> ":
-            addition = self.ws.recv()
-            result += addition if addition != ">>> " else ""
-
-        result_start = result.index("\r\n") + 2
-        result = result[result_start:]
+        result = self._send_to_core("send_to_device", [self.id, command, args])
 
         try:
             result = json.loads(result.split("\r\n")[0])
@@ -114,20 +112,13 @@ class Device:
             self.ws.close()
 
     def connect(self):
-        if self.status == DEVICE_NOT_CONNECTED:
-            try:
-                self.ws = websocket.WebSocket()
-                self.ws.connect("ws://" + self.ip + ":8266")
-                self.ws.recv()
-                self.ws.send("secret\n")
-                self.ws.recv()
-                self.ws.send("import user, json\r\n")
-                for x in range(0,len("import user, json") + 2):
-                    self.ws.recv()
-                self.status = DEVICE_CONNECTED
-            except Exception as e:
-                print(e)
-                self.status = DEVICE_NOT_CONNECTED
+
+        result = self._send_to_core("connect", [self.id, self.ip]).split("\n")
+
+        if not json.loads(result[0]):
+            raise Exception(result[1])
+        else:
+            self.status = DEVICE_CONNECTED
 
     def reset(self):
         if self.status == DEVICE_CONNECTED:

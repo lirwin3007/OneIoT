@@ -1,9 +1,9 @@
-import sys
-import Pyro4
-import Pyro4.util
+import DeviceManager
 
-sys.excepthook = Pyro4.util.excepthook
+manager = DeviceManager.DeviceManager()
 
-device_manager = Pyro4.Proxy("PYRONAME:oneIoT.device_manager")
-device_manager.add_device('hi')
-print(device_manager.get_device('hi'))
+test_device = manager.get_device("test")
+
+#test_device.connect()
+
+print(test_device.test_routine())
