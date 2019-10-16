@@ -1,4 +1,4 @@
-import websocket, webrepl_cli, json
+import json
 import configparser, esptool, serial, time, re
 
 import socket
@@ -34,6 +34,10 @@ class Device:
             sock.sendall(bytes(command_string, 'ascii'))
             result = str(sock.recv(1024), 'ascii')
             return result
+
+    @property
+    def connected(self):
+        return json.loads(self._send_to_core("connect_test", [self.id]))
 
     def refreshMethods(self):
         self.callables = json.load(open(self.device_path + "/device.json"))
@@ -108,8 +112,7 @@ class Device:
             raise Exception("No TTY Connection")
 
     def disconnect(self):
-        if self.status == DEVICE_CONNECTED:
-            self.ws.close()
+        self._send_to_core("disconnect", [self.id])
 
     def connect(self):
 
@@ -121,31 +124,22 @@ class Device:
             self.status = DEVICE_CONNECTED
 
     def reset(self):
-        if self.status == DEVICE_CONNECTED:
-            self.ws.send("import machine\r\n")
-            self.ws.send("machine.reset()\r\n")
-            self.disconnect()
-            self.connect()
+        self._send_to_core("reset", [self.id, self.ip])
 
     def upload(self, source, destination):
-        if self.status == DEVICE_CONNECTED:
-            # Parse the user's code for routines
-            all_routines = re.findall("def .*", open(source).read())
-            callables = {}
-            for routine in all_routines:
-                routine_name = routine[routine.index("def ")+4:routine.index("(")].strip()
-                args = routine[routine.find("(") + 1:routine.find(")")]
-                callables[routine_name] = args.split(",")
-                callables[routine_name] = [x.strip() for x in callables[routine_name]]
-                if callables[routine_name] == ['']:
-                    callables[routine_name] = []
+        # Parse the user's code for routines
+        all_routines = re.findall("def .*", open(source).read())
+        callables = {}
+        for routine in all_routines:
+            routine_name = routine[routine.index("def ")+4:routine.index("(")].strip()
+            args = routine[routine.find("(") + 1:routine.find(")")]
+            callables[routine_name] = args.split(",")
+            callables[routine_name] = [x.strip() for x in callables[routine_name]]
+            if callables[routine_name] == ['']:
+                callables[routine_name] = []
 
-            # Update the device's json file
-            open(self.device_path + '/device.json', 'w+').write(json.dumps(callables))
+        # Update the device's json file
+        open(self.device_path + '/device.json', 'w+').write(json.dumps(callables))
 
-            # Upload the file
-            self.disconnect()
-            webrepl_cli.main('secret', self.ip + ':' + destination, 'put', src_file=source)
-            self.connect()
-        else:
-            raise Exception("Device is not connected")
+        # Upload the file
+        self._send_to_core("upload", [self.id, self.ip, source, destination])
