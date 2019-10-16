@@ -16,7 +16,13 @@ class Callable:
         return self.device.send(self.command, list(argv))
 
 class Device:
+    """
+    A device represents a physical OneIoT device.
 
+    The class also contains methods corrisponding to any methods on the device
+    that it represents. These can be called like normal methods, and return
+    the value that the device returns.
+    """
     def __init__(self, config):
         self.id = config['id']
         self.ip = config['ip'] if 'ip' in config else None
@@ -37,6 +43,11 @@ class Device:
 
     @property
     def connected(self):
+        """
+        Get the connected state of the device.
+
+        :rtype: Boolean
+        """
         return json.loads(self._send_to_core("connect_test", [self.id]))
 
     def refreshMethods(self):
@@ -46,6 +57,9 @@ class Device:
             #exec("self." + callable + " = callableFunction('" + callable + "', self.callables[callable], self)")
 
     def save(self):
+        """
+        Save the device to be autoloaded by DeviceManager at next instantiation.
+        """
         config = configparser.ConfigParser()
         config['info'] = { 'id': self.id,
                            'ip': self.ip,
@@ -66,15 +80,34 @@ class Device:
         return result
 
     def flashTTY(self, port):
+        """
+        Flash the device with OneIoT firmware over a TTY port.
+
+        :param port: port that the device is plugged into (e.g. /dev/TTYUSB0)
+        :type port: String
+        """
         esptool.main(custom_commandline=['--port', '/dev/' + port, 'erase_flash'])
         esptool.main(custom_commandline=['--port', '/dev/' + port, 'write_flash', '-z', '0x1000', 'esp-32-img.bin'])
 
     def connectTTY(self, port):
+        """
+        Connect to a OneIoT device over a TTY port.
+
+        :param port: port that the device is plugged into (e.g. /dev/TTYUSB0)
+        :type port: String
+        """
         self.ser = serial.Serial('/dev/' + port, 115200, timeout=1)
         self._ttyPort = port
         self.receiveTTY()
 
     def receiveTTY(self, timeout=500):
+        """
+        Receive from a OneIoT device over a TTY port
+
+        :param timeout: timeout waiting for a response (ms)
+        :type timeout: Integer
+        :rtype: ByteString
+        """
         if self._ttyPort != None:
             result = b''
             addition = ' '
@@ -87,6 +120,13 @@ class Device:
             raise Exception("No TTY Connection")
 
     def sendTTY(self, command):
+        """
+        Send to a OneIoT device over a TTY port and return the result.
+
+        :param command: command to send to the OneIoT device
+        :type command: String
+        :rtype: ByteString
+        """
         if self._ttyPort != None:
             self.ser.writelines([str.encode(command) + b"\r\n"])
             self.ser.readline()
@@ -95,6 +135,9 @@ class Device:
             raise Exception("No TTY Connection")
 
     def disconnectTTY(self):
+        """
+        Disconnect from a OneIoT device over a TTY port.
+        """
         if self._ttyPort != None:
             self.ser.close()
             self._ttyPort = None
@@ -102,6 +145,9 @@ class Device:
             raise Exception("No TTY Connection")
 
     def resetTTY(self):
+        """
+        Reset a OneIoT device over a TTY port.
+        """
         if self._ttyPort != None:
             self.sendTTY("import machine")
             self.sendTTY("machine.reset()")
@@ -112,10 +158,15 @@ class Device:
             raise Exception("No TTY Connection")
 
     def disconnect(self):
+        """
+        Disconnect from a OneIoT device
+        """
         self._send_to_core("disconnect", [self.id])
 
     def connect(self):
-
+        """
+        Connect to a OneIoT device
+        """
         result = self._send_to_core("connect", [self.id, self.ip]).split("\n")
 
         if not json.loads(result[0]):
@@ -124,9 +175,20 @@ class Device:
             self.status = DEVICE_CONNECTED
 
     def reset(self):
+        """
+        Reset a OneIoT device
+        """
         self._send_to_core("reset", [self.id, self.ip])
 
     def upload(self, source, destination):
+        """
+        Upload a file to a OneIoT device
+
+        :param source: Source file (absolute file path)
+        :type source: String
+        :param destination: Destination file (absolute file path)
+        :type destination: String
+        """
         # Parse the user's code for routines
         all_routines = re.findall("def .*", open(source).read())
         callables = {}

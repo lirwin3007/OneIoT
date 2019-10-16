@@ -3,6 +3,9 @@ from Device import Device
 import os, json, configparser
 
 class DeviceManager:
+    """
+        Device manager acts as an entrypoint for interacting with any OneIoT device.
+    """
 
     def __init__(self):
         self._devices = {}
@@ -23,6 +26,17 @@ class DeviceManager:
             self._devices[new_device.id] = new_device
 
     def add_device(self, id, port):
+        """
+        Flash a device plugged into the Raspberry pi with OneIoT firmware and
+        assign an ID to it to refer to it later.
+
+        :param id: ID to assign the device
+        :param port: port that the device is plugged into (e.g. /dev/TTYUSB0)
+        :type id: String
+        :type port: String
+
+        .. seealso:: add_device() is almost always ran before init_device()
+        """
         if id not in self._devices:
             ipEnd = 1
             ipFound = True
@@ -42,6 +56,17 @@ class DeviceManager:
             raise Exception("Device id already taken")
 
     def init_device(self, id, port):
+        """
+        Take a device that has already been added and initialise it to be
+        a OneIoT device.
+
+        :param id: ID of the device
+        :param port: port that the device is plugged into (e.g. /dev/TTYUSB0)
+        :type id: String
+        :type port: String
+
+        .. seealso:: init_device() is almost always ran after add_device()
+        """
         if id in self._devices:
             device = self._devices[id]
             device.connectTTY(port)
@@ -70,6 +95,14 @@ class DeviceManager:
 
 
     def get_device(self, device_id):
+        """
+        Return a OneIoT device.
+
+        :param device_id: ID of the device
+        :type id: String
+        :rtype: Device
+
+        """
         if device_id not in self._devices:
             raise Exception("Device id not found")
         else:
