@@ -1,4 +1,4 @@
-from Device import Device
+from .Device import Device
 
 import os, json, configparser
 
@@ -107,6 +107,15 @@ class DeviceManager:
             raise Exception("Device id not found")
         else:
             return self._devices[device_id]
+
+    def get_devices(self):
+        """
+        Return a dictionary of OneIoT devices.
+
+        :rtype: Dict
+
+        """
+        return self._devices
 
 ## Testing
 

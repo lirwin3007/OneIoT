@@ -50,6 +50,15 @@ class Device:
         """
         return json.loads(self._send_to_core("connect_test", [self.id]))
 
+    @property
+    def code(self):
+        """
+        Get the code currently on the device.
+
+        :rtype: String
+        """
+        return open(self.device_path + "/user.py").read()
+
     def refreshMethods(self):
         self.callables = json.load(open(self.device_path + "/device.json"))
         for callable in self.callables:
@@ -180,9 +189,21 @@ class Device:
         """
         self._send_to_core("reset", [self.id, self.ip])
 
+    def uploadString(self, stringSource, destination):
+        """
+        Upload a given string as a file to a OneIoT device.
+
+        :param stringSource: Source string
+        :type stringSource: String
+        :param destination: Destination file (absolute file path)
+        :type destination: String
+        """
+        open(self.device_path + "/user.py", "w").write(stringSource)
+        self.upload(self.device_path + "/user.py", destination)
+
     def upload(self, source, destination):
         """
-        Upload a file to a OneIoT device
+        Upload a file to a OneIoT device.
 
         :param source: Source file (absolute file path)
         :type source: String
