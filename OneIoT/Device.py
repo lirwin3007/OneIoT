@@ -223,6 +223,7 @@ class Device:
 
         # Update the device's json file
         open(self.device_path + '/device.json', 'w+').write(json.dumps(callables))
+        self.refreshMethods()
 
         # Upload the file
         self._send_to_core("upload", [self.id, self.ip, source, destination])
