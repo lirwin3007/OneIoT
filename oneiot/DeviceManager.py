@@ -1,6 +1,6 @@
 from .Device import Device
 
-import os, json, configparser
+import os, json, configparser, shutil
 
 class DeviceManager:
     """
@@ -18,8 +18,8 @@ class DeviceManager:
         if not os.path.isdir(self._device_path + '/devices'):
             os.mkdir(self._device_path + '/devices')
 
-        config = configparser.ConfigParser()
         for directory in [f.path for f in os.scandir(self._device_path + '/devices') if f.is_dir()]:
+            config = configparser.ConfigParser()
             config.read(directory + '/config.ini')
             config = {x:config['info'][x] for x in config['info']}
             new_device = Device(config)
@@ -43,17 +43,35 @@ class DeviceManager:
             while ipFound:
                 ipFound = False
                 for device in self._devices:
+                    device = self._devices[device]
                     if device.ip == '192.168.4.' + str(ipEnd):
                         ipFound = True
                 ipEnd += 1
-            device_path = self._device_path + '/devices/' + device.id
+            device_path = self._device_path + '/devices/' + id
             if not os.path.isdir(device_path):
                 os.mkdir(device_path)
-            device = Device({'id': id, 'ip': '192.168.4.' + str(ipEnd), 'device_path': device_path})
-            device.flashTTY(port)
+            device = Device({'id': id, 'ip': '192.168.4.' + str(ipEnd), 'device_path': device_path}, new_device=True)
+            #device.flashTTY(port)
             self._devices[device.id] = device
         else:
             raise Exception("Device id already taken")
+
+    def remove_device(self, id):
+        """
+        Remove a device from the Device Manager
+
+        :param id: ID of the device to remove
+        :type id: String
+
+        """
+        if id in self._devices:
+            device = self._devices[id]
+            if device.connected:
+                device.disconnect()
+            shutil.rmtree(device.device_path)
+            del self._devices[id]
+        else:
+            raise Exception("Device id does not exist")
 
     def init_device(self, id, port):
         """

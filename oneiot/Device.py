@@ -1,5 +1,5 @@
 import json
-import configparser, esptool, serial, time, re
+import configparser, esptool, serial, time, re, os
 
 import socket
 
@@ -23,13 +23,16 @@ class Device:
     that it represents. These can be called like normal methods, and return
     the value that the device returns.
     """
-    def __init__(self, config):
+    def __init__(self, config, new_device=False):
         self.id = config['id']
         self.ip = config['ip'] if 'ip' in config else None
         self.device_path = config["device_path"]
         self.status = DEVICE_NOT_CONNECTED
         self._ttyPort = None
-        self.refreshMethods()
+        if not new_device:
+            self.refreshMethods()
+        else:
+            self.callables = []
 
     def _send_to_core(self, command, args):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -57,7 +60,10 @@ class Device:
 
         :rtype: String
         """
-        return open(self.device_path + "/user.py").read()
+        if os.path.exists(self.device_path + "/user.py"):
+            return open(self.device_path + "/user.py").read()
+        else:
+            return ""
 
     def refreshMethods(self):
         self.callables = json.load(open(self.device_path + "/device.json"))
@@ -73,9 +79,9 @@ class Device:
         config['info'] = { 'id': self.id,
                            'ip': self.ip,
                            'device_path': self.device_path }
-        with open(folder_path + '/config.ini', 'w+') as configfile:
+        with open(self.device_path + '/config.ini', 'w+') as configfile:
             config.write(configfile)
-        with open(folder_path + '/device.json', 'w+') as devicefile:
+        with open(self.device_path + '/device.json', 'w+') as devicefile:
             devicefile.write("[]");
 
     def send(self, command, args):
