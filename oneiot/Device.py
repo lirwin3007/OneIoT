@@ -12,8 +12,8 @@ class Callable:
         self.command = command
         self.device = device
 
-    def __call__(self, *argv):
-        return self.device.send(self.command, list(argv))
+    def __call__(self, *kwargs):
+        return self.device.send(self.command, kwargs)
 
 class Device:
     """
@@ -51,7 +51,7 @@ class Device:
 
         :rtype: Boolean
         """
-        return json.loads(self._send_to_core("connect_test", [self.id]))
+        return json.loads(self._send_to_core("connect_test", [self.id, self.ip]))
 
     @property
     def code(self):
@@ -85,7 +85,7 @@ class Device:
             devicefile.write("[]");
 
     def send(self, command, args):
-        result = self._send_to_core("send_to_device", [self.id, command, args])
+        result = self._send_to_core("send_to_device", [self.id, self.ip, command, json.dumps(args)])
 
         try:
             result = json.loads(result.split("\r\n")[0])
@@ -172,22 +172,22 @@ class Device:
         else:
             raise Exception("No TTY Connection")
 
-    def disconnect(self):
-        """
-        Disconnect from a OneIoT device
-        """
-        self._send_to_core("disconnect", [self.id])
-
-    def connect(self):
-        """
-        Connect to a OneIoT device
-        """
-        result = self._send_to_core("connect", [self.id, self.ip]).split("\n")
-
-        if not json.loads(result[0]):
-            raise Exception(result[1])
-        else:
-            self.status = DEVICE_CONNECTED
+    # def disconnect(self):
+    #     """
+    #     Disconnect from a OneIoT device
+    #     """
+    #     self._send_to_core("disconnect", [self.id])
+    #
+    # def connect(self):
+    #     """
+    #     Connect to a OneIoT device
+    #     """
+    #     result = self._send_to_core("connect", [self.id, self.ip]).split("\n")
+    #
+    #     if not json.loads(result[0]):
+    #         raise Exception(result[1])
+    #     else:
+    #         self.status = DEVICE_CONNECTED
 
     def reset(self):
         """
@@ -233,3 +233,44 @@ class Device:
 
         # Upload the file
         self._send_to_core("upload", [self.id, self.ip, source, destination])
+
+    def program(self, sourceCode):
+        """
+        Program a OneIoT device.
+
+        :param sourceCode: Source code
+        :type source: String
+        """
+        # Store the user's code in a file
+        file = open(self.device_path + '/user.py', 'w')
+        file.write(sourceCode)
+        file.close()
+
+        # Parse the user's code for routines
+        all_routines = re.findall("def .*", sourceCode)
+        callables = {}
+        for routine in all_routines:
+            routine_name = routine[routine.index("def ")+4:routine.index("(")].strip()
+            args = routine[routine.find("(") + 1:routine.find(")")]
+            callables[routine_name] = args.split(",")
+            callables[routine_name] = [x.strip() for x in callables[routine_name]]
+            if callables[routine_name] == ['']:
+                callables[routine_name] = []
+
+        # Create the main file
+        file = open(self.device_path + '/main.py', 'w')
+        templateFile = open(os.environ['HOME'] + '/.oneIot/main_template.py', 'r').read()
+        templateFile = templateFile.replace("{{CALLABLES}}", json.dumps(callables))
+        file.write(templateFile)
+        file.close()
+
+        # Update the device's json file
+        open(self.device_path + '/device.json', 'w+').write(json.dumps(callables))
+        self.refreshMethods()
+
+        # Upload the files
+        self._send_to_core("upload", [self.id, self.ip, self.device_path + '/main.py', 'main.py'])
+        self._send_to_core("upload", [self.id, self.ip, self.device_path + '/user.py', 'user.py'])
+
+        # Reset the device for changes to take effect
+        self._send_to_core("reset_webrepl", [self.ip])

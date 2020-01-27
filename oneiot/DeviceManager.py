@@ -46,7 +46,7 @@ class DeviceManager:
                     device = self._devices[device]
                     if device.ip == '192.168.4.' + str(ipEnd):
                         ipFound = True
-                ipEnd += 1
+                        ipEnd += 1
             device_path = self._device_path + '/devices/' + id
             if not os.path.isdir(device_path):
                 os.mkdir(device_path)
@@ -102,12 +102,10 @@ class DeviceManager:
             print(device.sendTTY('boot.write("import webrepl\\n")'))
             print(device.sendTTY('boot.write("webrepl.start()\\n")'))
             print(device.sendTTY('boot.close()'))
-            print(device.sendTTY('user = open("user.py", "wb")'))
-            print(device.sendTTY('user.write("pass")'))
-            print(device.sendTTY('user.close()'))
             device.resetTTY()
             device.disconnectTTY()
             device.save()
+            device.program("")
         else:
             raise Exception("Unknown device id")
 
