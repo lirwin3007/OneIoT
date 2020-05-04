@@ -1,4 +1,2 @@
-Getting Started
+Introduction to Device Programming
 ==================================
-
-Todo

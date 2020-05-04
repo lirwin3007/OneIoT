@@ -1,6 +1,0 @@
-======
-Device
-======
-
-.. automodule:: Device
-  :members:
