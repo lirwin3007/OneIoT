@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="oneiot",
-    version="0.0.1",
+    version="0.1.0",
     author="Louis Irwin",
     author_email="coding@louisirwin.co.uk",
     description="OneIoT",
