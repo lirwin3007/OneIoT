@@ -105,16 +105,3 @@ class EventBus():
             self.callbacks[pattern].push(function)
         else:
             self.callbacks[pattern] = [function]
-
-def test_callback(id, data, evbus):
-    print(f"Recieved event! - {data}")
-
-def test_callback2(id, data, evbus):
-    evbus.send('hello', 'hello to you too!')
-
-a = EventBus(core_ip="192.168.2.111")
-a.connect()
-#a.send('hello.world')
-a.on("hello.world", test_callback)
-a.on("hello.*", test_callback2)
-#a.disconnect()
