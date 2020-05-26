@@ -34,7 +34,10 @@ class EventBus():
         self.loop.call_soon_threadsafe(self.stop.set_result, None)
 
         # Wait for the event loop to terminate.
-        self.thread.join()
+        try:
+            self.thread.join()
+        except:
+            pass
 
     async def run_client(self, loop):
         # Initiate the connection
@@ -81,7 +84,8 @@ class EventBus():
     async def consumer_handler(self, message):
         message = json.loads(message)
         data = message['data'] if 'data' in message else None
-        for pattern in self.callbacks:
+        callback_copy = {k: v for (k, v) in self.callbacks.items()}
+        for pattern in callback_copy:
             if self._matches(message['id'], pattern):
                 for callback in self.callbacks[pattern]:
                     callback(message['id'], data, self)
